@@ -172,93 +172,27 @@ Event
 
 **Важно:** API предоставляет только GET endpoints для чтения данных. Все модификации данных (создание, обновление, удаление) осуществляются через админ-панель Django.
 
-### Producer (Производители)
-- `GET /api/producers/` - список всех производителей (возвращает все записи)
-- `GET /api/producers/{id}/` - детали конкретного производителя
-
-### WineCategory (Категории вин)
-- `GET /api/categories/` - список всех категорий (возвращает все записи)
-- `GET /api/categories/{id}/` - детали конкретной категории
-
-### WineColor (Цвета вин)
-- `GET /api/colors/` - список всех цветов (возвращает все записи)
-- `GET /api/colors/{id}/` - детали конкретного цвета
-
-### WineSugar (Содержание сахара)
-- `GET /api/sugars/` - список всех типов сахара (возвращает все записи)
-- `GET /api/sugars/{id}/` - детали конкретного типа
-
-### Country (Страны)
-- `GET /api/countries/` - список всех стран (возвращает все записи)
-- `GET /api/countries/{id}/` - детали конкретной страны
-
-### Region (Регионы)
-- `GET /api/regions/` - список всех регионов (возвращает все записи)
-- `GET /api/regions/{id}/` - детали конкретного региона
-
 ### Wine (Вино)
-- `GET /api/wines/` - список всех вин (возвращает все записи, с фильтрацией)
+- `GET /api/wines/` - список всех вин (возвращает все записи)
 - `GET /api/wines/{id}/` - детали конкретного вина
 
-**Параметры фильтрации для Wine:**
-- `GET /api/wines/?saved=true` - фильтрация по сохраненным винам
-- `GET /api/wines/?category={id}` - фильтрация по категории
-- `GET /api/wines/?producer={id}` - фильтрация по производителю
-- `GET /api/wines/?country={id}` - фильтрация по стране
-- `GET /api/wines/?region={id}` - фильтрация по региону
-- `GET /api/wines/?price_min={value}&price_max={value}` - фильтрация по цене
-
-### City (Города)
-- `GET /api/cities/` - список всех городов (возвращает все записи)
-- `GET /api/cities/{id}/` - детали конкретного города
-
 ### Event (События)
-- `GET /api/events/` - список всех событий (возвращает все записи, с фильтрацией)
+- `GET /api/events/` - список всех событий (возвращает все записи)
 - `GET /api/events/{id}/` - детали конкретного события
-
-**Параметры фильтрации для Event:**
-- `GET /api/events/?city={id}` - фильтрация по городу
-- `GET /api/events/?producer={id}` - фильтрация по производителю
-- `GET /api/events/?date_from={date}&date_to={date}` - фильтрация по дате
-- `GET /api/events/?available=true` - только события с доступными билетами
 
 ## Сериализаторы (Serializers)
 
-Для каждой модели будет создан соответствующий сериализатор:
-- `ProducerSerializer` - для Producer
-- `WineCategorySerializer` - для WineCategory
-- `WineColorSerializer` - для WineColor
-- `WineSugarSerializer` - для WineSugar
-- `CountrySerializer` - для Country
-- `RegionSerializer` - для Region
-- `WineSerializer` - для Wine (с вложенными объектами для связанных моделей)
-- `CitySerializer` - для City
-- `EventSerializer` - для Event (с вложенными объектами для связанных моделей)
+Для API endpoints будут созданы следующие сериализаторы:
+- `WineSerializer` - для Wine (с вложенными объектами для связанных моделей: Producer, WineCategory, WineSugar, Country, Region)
+- `EventSerializer` - для Event (с вложенными объектами для связанных моделей: City, Producer, Wine)
+
+**Примечание:** Для вложенных объектов в сериализаторах Wine и Event будут использоваться простые сериализаторы связанных моделей (Producer, WineCategory, WineSugar, Country, Region, City), но они не будут иметь отдельных API endpoints.
 
 ## Представления (Views)
 
 Использование ReadOnlyViewSet из Django REST Framework (только чтение данных):
-- `ProducerViewSet` - для Producer (ReadOnlyViewSet)
-- `WineCategoryViewSet` - для WineCategory (ReadOnlyViewSet)
-- `WineColorViewSet` - для WineColor (ReadOnlyViewSet)
-- `WineSugarViewSet` - для WineSugar (ReadOnlyViewSet)
-- `CountryViewSet` - для Country (ReadOnlyViewSet)
-- `RegionViewSet` - для Region (ReadOnlyViewSet)
-- `WineViewSet` - для Wine (ReadOnlyViewSet с фильтрацией)
-- `CityViewSet` - для City (ReadOnlyViewSet)
-- `EventViewSet` - для Event (ReadOnlyViewSet с фильтрацией)
-
-## Фильтрация и поиск
-
-### Wine
-- Фильтрация по: category, sugar, country, region, producer, price (диапазон), saved
-- Поиск по: name, description
-- **Важно:** Все данные возвращаются без пагинации
-
-### Event
-- Фильтрация по: city, producer, date (диапазон), available
-- Поиск по: name, place, address
-- **Важно:** Все данные возвращаются без пагинации
+- `WineViewSet` - для Wine (ReadOnlyViewSet)
+- `EventViewSet` - для Event (ReadOnlyViewSet)
 
 ## Настройки медиа-файлов
 
