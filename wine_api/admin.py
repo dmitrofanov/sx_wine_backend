@@ -49,18 +49,18 @@ class WineGrapeCompositionInline(admin.TabularInline):
 
 @admin.register(Wine)
 class WineAdmin(admin.ModelAdmin):
-    list_display = ['name', 'producer', 'category', 'country', 'price', 'saved', 'get_grape_varieties']
+    list_display = ['name', 'producer', 'category', 'country', 'price', 'get_grape_varieties']
     inlines = [WineGrapeCompositionInline]
-    list_filter = ['category', 'sugar', 'country', 'region', 'producer', 'saved']
+    list_filter = ['category', 'sugar', 'country', 'region', 'producer']
     search_fields = ['name', 'description']
     filter_horizontal = []
     readonly_fields = []
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'image', 'description', 'saved')
+            'fields': ('name', 'image', 'description')
         }),
         ('Характеристики', {
-            'fields': ('category', 'sugar', 'volume', 'aging')
+            'fields': ('category', 'sugar', 'color', 'volume', 'aging', 'aging_caption')
         }),
         ('Происхождение', {
             'fields': ('country', 'region', 'producer')

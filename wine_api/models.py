@@ -96,21 +96,23 @@ class Wine(models.Model):
     """Модель вина"""
     name = models.CharField(max_length=255, verbose_name="Название")
     image = models.ImageField(upload_to='wines/', verbose_name="Изображение", blank=True, null=True)
-    saved = models.BooleanField(default=False, verbose_name="Сохранено")
     category = models.ForeignKey(WineCategory, on_delete=models.CASCADE, related_name='wines', verbose_name="Категория")
     sugar = models.ForeignKey(WineSugar, on_delete=models.CASCADE, related_name='wines', verbose_name="Содержание сахара")
+    color = models.ForeignKey(WineColor, on_delete=models.CASCADE, related_name='wines', verbose_name="Цвет")
     country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='wines', verbose_name="Страна")
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='wines', verbose_name="Регион")
     grape_varieties = models.ManyToManyField(
         GrapeVariety,
         through='WineGrapeComposition',
-        related_name='wines'
+        related_name='wines',
+        blank=True
     )
     volume = models.FloatField(verbose_name="Объем (л)")
     producer = models.ForeignKey(Producer, on_delete=models.CASCADE, related_name='wines', verbose_name="Производитель")
     price = models.IntegerField(verbose_name="Цена", null=True, blank=True)
     aging = models.IntegerField(verbose_name="Год производства")
-    description = models.TextField(verbose_name="Описание", blank=True)
+    aging_caption = models.CharField(max_length=255,verbose_name="Описание года производства", blank=True, null=True)
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)
     
 
     class Meta:
@@ -162,13 +164,13 @@ class Event(models.Model):
     """Модель события"""
     name = models.CharField(max_length=255, verbose_name="Название")
     date = models.DateField(verbose_name="Дата")
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='events', verbose_name="Город")
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='events', verbose_name="Город", blank=True, null=True)
     place = models.CharField(max_length=255, verbose_name="Место проведения")
-    address = models.CharField(max_length=255, verbose_name="Адрес")
-    price = models.IntegerField(verbose_name="Цена билета")
-    available = models.IntegerField(verbose_name="Доступно билетов")
+    address = models.CharField(max_length=255, verbose_name="Адрес", blank=True, null=True)
+    price = models.IntegerField(verbose_name="Цена билета", blank=True, null=True)
+    available = models.IntegerField(verbose_name="Доступно билетов", blank=True, null=True)
     producer = models.ForeignKey(Producer, on_delete=models.CASCADE, related_name='events', verbose_name="Производитель")
-    image = models.ImageField(upload_to='events/', verbose_name="Изображение", blank=True, null=True)
+    image = models.ImageField(upload_to='events/', verbose_name="Изображение")
     wine_list = models.ManyToManyField(Wine, related_name='events', verbose_name="Список вин", blank=True)
 
     class Meta:

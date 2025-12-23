@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Producer, WineCategory, WineSugar, Country, Region,
-    Wine, City, Event
+    Wine, City, Event, GrapeVariety, WineGrapeComposition
 )
 
 
@@ -47,6 +47,25 @@ class CitySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
+class GrapeVarietySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrapeVariety
+        fields = ['id', 'name']
+
+
+class WineGrapeCompositionSerializer(serializers.ModelSerializer):
+    # Option A: Include full grape variety object
+    # grape_variety = GrapeVarietySerializer(read_only=True)
+    
+    # Option B: Just include the name (matches your frontend structure)
+    name = serializers.CharField(source='grape_variety.name', read_only=True)
+    
+    class Meta:
+        model = WineGrapeComposition
+        fields = ['name', 'percentage']  # For Option B
+        # OR fields = ['grape_variety', 'percentage']  # For Option A
+
+    
 class WineSerializer(serializers.ModelSerializer):
     """Сериализатор для Wine с вложенными объектами"""
     producer = ProducerSerializer(read_only=True)
@@ -54,13 +73,18 @@ class WineSerializer(serializers.ModelSerializer):
     sugar = WineSugarSerializer(read_only=True)
     country = CountrySerializer(read_only=True)
     region = RegionSerializer(read_only=True)
+    grape_variety = WineGrapeCompositionSerializer(
+        source='winegrapecomposition_set',  # Default related_name
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Wine
         fields = [
-            'id', 'name', 'image', 'saved', 'category', 'sugar',
+            'id', 'name', 'image', 'category', 'sugar',
             'country', 'region', 'volume', 'producer', 'price',
-            'aging', 'description'
+            'aging', 'aging_caption', 'description', 'grape_variety'   
         ]
 
 
