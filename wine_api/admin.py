@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Producer, WineCategory, WineColor, WineSugar,
-    Country, Region, Wine, City, Event, GrapeVariety, WineGrapeComposition
+    Country, Region, Wine, City, Event, GrapeVariety, WineGrapeComposition,
+    PersonGrade, Person
 )
 
 
@@ -113,6 +114,24 @@ class EventAdmin(admin.ModelAdmin):
         }),
         ('Связанные объекты', {
             'fields': ('producer', 'wine_list')
+        }),
+    )
+
+
+@admin.register(PersonGrade)
+class PersonGradeAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ['nickname', 'firstname', 'lastname', 'phone', 'grade']
+    list_filter = ['grade']
+    search_fields = ['nickname', 'firstname', 'lastname', 'phone']
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('nickname', 'firstname', 'lastname', 'phone', 'grade')
         }),
     )
 

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Producer, WineCategory, WineSugar, Country, Region,
-    Wine, City, Event, GrapeVariety, WineGrapeComposition
+    Wine, City, Event, GrapeVariety, WineGrapeComposition,
+    PersonGrade, Person
 )
 
 
@@ -100,4 +101,25 @@ class EventSerializer(serializers.ModelSerializer):
             'id', 'name', 'date', 'city', 'place', 'address',
             'price', 'available', 'producer', 'image', 'wine_list'
         ]
+
+
+class PersonGradeSerializer(serializers.ModelSerializer):
+    """Сериализатор для PersonGrade (используется во вложенных объектах)"""
+    class Meta:
+        model = PersonGrade
+        fields = ['id', 'name']
+
+
+class PersonSerializer(serializers.ModelSerializer):
+    """Сериализатор для Person"""
+    grade = PersonGradeSerializer(read_only=True)
+    grade_id = serializers.PrimaryKeyRelatedField(
+        queryset=PersonGrade.objects.all(),
+        source='grade',
+        write_only=True
+    )
+
+    class Meta:
+        model = Person
+        fields = ['id', 'nickname', 'phone', 'firstname', 'lastname', 'grade', 'grade_id']
 

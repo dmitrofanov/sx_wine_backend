@@ -2,8 +2,8 @@ from datetime import date
 
 from rest_framework import viewsets
 
-from .models import Wine, Event
-from .serializers import WineSerializer, EventSerializer
+from .models import Wine, Event, Person
+from .serializers import WineSerializer, EventSerializer, PersonSerializer
 
 
 class WineViewSet(viewsets.ReadOnlyModelViewSet):
@@ -48,4 +48,13 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
                 pass  # некорректный формат — игнорируем фильтр
 
         return qs
+
+
+class PersonViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet для работы с персонами.
+    Предоставляет GET, POST, PUT, PATCH, DELETE endpoints.
+    """
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
 

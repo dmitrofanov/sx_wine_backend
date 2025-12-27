@@ -181,3 +181,33 @@ class Event(models.Model):
     def __str__(self):
         return self.name
 
+
+class PersonGrade(models.Model):
+    """Модель ранга персоны"""
+    name = models.CharField(max_length=255, verbose_name="Имя ранга")
+
+    class Meta:
+        verbose_name = "Ранг персоны"
+        verbose_name_plural = "Ранги персон"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Person(models.Model):
+    """Модель персоны"""
+    nickname = models.CharField(max_length=255, verbose_name="Никнейм")
+    phone = models.CharField(max_length=255, verbose_name="Телефон")
+    firstname = models.CharField(max_length=255, verbose_name="Имя")
+    lastname = models.CharField(max_length=255, verbose_name="Фамилия")
+    grade = models.ForeignKey(PersonGrade, on_delete=models.CASCADE, related_name='persons', verbose_name="Ранг")
+
+    class Meta:
+        verbose_name = "Персона"
+        verbose_name_plural = "Персоны"
+        ordering = ['lastname', 'firstname']
+
+    def __str__(self):
+        return f"{self.lastname} {self.firstname} ({self.nickname})"
+
