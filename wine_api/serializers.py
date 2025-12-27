@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Producer, WineCategory, WineSugar, Country, Region,
     Wine, City, Event, GrapeVariety, WineGrapeComposition,
-    PersonGrade, Person
+    PersonGrade, Person, WineColor
 )
 
 
@@ -18,7 +18,12 @@ class WineCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = WineCategory
         fields = ['id', 'name']
-
+    
+class WineColorSerializer(serializers.ModelSerializer):
+    """Сериализатор для WineColor (используется во вложенных объектах)"""
+    class Meta:
+        model = WineColor
+        fields = ['id', 'name']
 
 class WineSugarSerializer(serializers.ModelSerializer):
     """Сериализатор для WineSugar (используется во вложенных объектах)"""
@@ -72,6 +77,7 @@ class WineSerializer(serializers.ModelSerializer):
     producer = ProducerSerializer(read_only=True)
     category = WineCategorySerializer(read_only=True)
     sugar = WineSugarSerializer(read_only=True)
+    color = WineColorSerializer(read_only=True)
     country = CountrySerializer(read_only=True)
     region = RegionSerializer(read_only=True)
     grape_variety = WineGrapeCompositionSerializer(
@@ -83,7 +89,7 @@ class WineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wine
         fields = [
-            'id', 'name', 'image', 'category', 'sugar',
+            'id', 'name', 'image', 'category', 'sugar', 'color',
             'country', 'region', 'volume', 'producer', 'price',
             'aging', 'aging_caption', 'description', 'grape_variety'   
         ]
