@@ -50,15 +50,15 @@ class WineGrapeCompositionInline(admin.TabularInline):
 
 @admin.register(Wine)
 class WineAdmin(admin.ModelAdmin):
-    list_display = ['name', 'producer', 'category', 'country', 'price', 'get_grape_varieties']
+    list_display = ['full_name', 'producer', 'category', 'country', 'price', 'get_grape_varieties']
     inlines = [WineGrapeCompositionInline]
     list_filter = ['category', 'sugar', 'country', 'region', 'producer']
-    search_fields = ['name', 'description']
+    search_fields = ['name', 'producer__name', 'aging', 'aging_caption']
     filter_horizontal = []
-    readonly_fields = []
+    readonly_fields = ['full_name']
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'image', 'description')
+            'fields': ('name', 'full_name', 'image', 'description')
         }),
         ('Характеристики', {
             'fields': ('category', 'sugar', 'color', 'volume', 'aging', 'aging_caption')
@@ -70,6 +70,11 @@ class WineAdmin(admin.ModelAdmin):
             'fields': ('price',)
         }),
     )
+
+    def full_name(self, obj):
+        """Отображение составного имени в списке"""
+        return obj.full_name
+    full_name.short_description = "Полное название"
 
     def get_grape_varieties(self, obj):
         """Display grape varieties in list view"""

@@ -123,6 +123,25 @@ class Wine(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def full_name(self):
+        """Составное имя: название вина - производитель - год производства"""
+        parts = [self.name]
+        
+        if self.producer:
+            parts.append(self.producer.name)
+        
+        aging = []
+        if self.aging_caption:
+            aging.append(self.aging_caption)
+        if self.aging:
+            aging.append(str(self.aging))
+        
+        if aging:
+            parts.extend(aging)
+        
+        return " - ".join(parts)
+
 
 class WineGrapeComposition(models.Model):
     wine = models.ForeignKey(Wine, on_delete=models.CASCADE)
