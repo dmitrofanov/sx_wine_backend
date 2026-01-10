@@ -182,29 +182,6 @@ class City(models.Model):
         return self.name
 
 
-class Event(models.Model):
-    """Модель события"""
-    name = models.CharField(max_length=255, verbose_name="Название")
-    date = models.DateField(verbose_name="Дата")
-    time = models.TimeField(verbose_name="Время", default=time(0, 0))
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='events', verbose_name="Город", blank=True, null=True)
-    place = models.CharField(max_length=255, verbose_name="Место проведения")
-    address = models.CharField(max_length=255, verbose_name="Адрес", blank=True, null=True)
-    price = models.IntegerField(verbose_name="Цена билета", blank=True, null=True)
-    available = models.IntegerField(verbose_name="Доступно билетов", blank=True, null=True)
-    producer = models.ForeignKey(Producer, on_delete=models.CASCADE, related_name='events', verbose_name="Производитель")
-    image = models.ImageField(upload_to='events/', verbose_name="Изображение")
-    wine_list = models.ManyToManyField(Wine, related_name='events', verbose_name="Список вин", blank=True)
-
-    class Meta:
-        verbose_name = "Событие"
-        verbose_name_plural = "События"
-        ordering = ['date', 'name']
-
-    def __str__(self):
-        return self.name
-
-
 class PersonGrade(models.Model):
     """Модель ранга персоны"""
     name = models.CharField(max_length=255, verbose_name="Имя ранга")
@@ -233,4 +210,31 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.lastname} {self.firstname} ({self.nickname})"
+
+
+class Event(models.Model):
+    """Модель события"""
+    name = models.CharField(max_length=255, verbose_name="Название")
+    date = models.DateField(verbose_name="Дата")
+    time = models.TimeField(verbose_name="Время", default=time(0, 0))
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='events', verbose_name="Город", blank=True, null=True)
+    place = models.CharField(max_length=255, verbose_name="Место проведения")
+    address = models.CharField(max_length=255, verbose_name="Адрес", blank=True, null=True)
+    price = models.IntegerField(verbose_name="Цена билета", blank=True, null=True)
+    available = models.IntegerField(verbose_name="Доступно билетов", blank=True, null=True)
+    producer = models.ForeignKey(Producer, on_delete=models.CASCADE, related_name='events', verbose_name="Производитель")
+    image = models.ImageField(upload_to='events/', verbose_name="Изображение")
+    wine_list = models.ManyToManyField(Wine, related_name='events', verbose_name="Список вин", blank=True)
+    participants = models.ManyToManyField(Person, related_name='events', verbose_name="Список участников", blank=True)
+
+    class Meta:
+        verbose_name = "Событие"
+        verbose_name_plural = "События"
+        ordering = ['date', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+
 

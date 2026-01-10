@@ -106,7 +106,7 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ['name', 'date', 'time', 'city', 'place', 'price', 'available']
     list_filter = ['city', 'producer', 'date']
     search_fields = ['name', 'place', 'address', 'date']
-    filter_horizontal = ['wine_list']
+    filter_horizontal = ['wine_list', 'participants']
     fieldsets = (
         ('Основная информация', {
             'fields': ('name', 'date', 'time', 'image')
@@ -118,7 +118,7 @@ class EventAdmin(admin.ModelAdmin):
             'fields': ('price', 'available')
         }),
         ('Связанные объекты', {
-            'fields': ('producer', 'wine_list')
+            'fields': ('producer', 'wine_list', 'participants')
         }),
     )
 
