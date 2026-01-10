@@ -129,7 +129,9 @@ class WineGrapeComposition(models.Model):
     grape_variety = models.ForeignKey(GrapeVariety, on_delete=models.CASCADE, verbose_name="Сорт винограда")
     percentage = models.PositiveIntegerField(
         verbose_name="Процент содержания",
-        help_text="Процентное содержание сорта в вине"
+        help_text="Процентное содержание сорта в вине",
+        blank=True,
+        null=True,
     )
     
     class Meta:
