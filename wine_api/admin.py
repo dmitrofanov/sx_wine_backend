@@ -103,13 +103,13 @@ class CityAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'date', 'city', 'place', 'price', 'available']
+    list_display = ['name', 'date', 'time', 'city', 'place', 'price', 'available']
     list_filter = ['city', 'producer', 'date']
-    search_fields = ['name', 'place', 'address']
+    search_fields = ['name', 'place', 'address', 'date']
     filter_horizontal = ['wine_list']
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'date', 'image')
+            'fields': ('name', 'date', 'time', 'image')
         }),
         ('Место проведения', {
             'fields': ('city', 'place', 'address')

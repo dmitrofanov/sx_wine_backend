@@ -1,5 +1,6 @@
+from email.policy import default
 from django.db import models
-
+from datetime import time
 
 class Producer(models.Model):
     """Модель производителя вина"""
@@ -185,6 +186,7 @@ class Event(models.Model):
     """Модель события"""
     name = models.CharField(max_length=255, verbose_name="Название")
     date = models.DateField(verbose_name="Дата")
+    time = models.TimeField(verbose_name="Время", default=time(0, 0))
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='events', verbose_name="Город", blank=True, null=True)
     place = models.CharField(max_length=255, verbose_name="Место проведения")
     address = models.CharField(max_length=255, verbose_name="Адрес", blank=True, null=True)
