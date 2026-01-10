@@ -110,7 +110,7 @@ class Wine(models.Model):
     volume = models.FloatField(verbose_name="Объем (л)")
     producer = models.ForeignKey(Producer, on_delete=models.CASCADE, related_name='wines', verbose_name="Производитель")
     price = models.IntegerField(verbose_name="Цена", null=True, blank=True)
-    aging = models.IntegerField(verbose_name="Год производства")
+    aging = models.IntegerField(verbose_name="Год производства", blank=True, null=True)
     aging_caption = models.CharField(max_length=255,verbose_name="Описание года производства", blank=True, null=True)
     description = models.TextField(verbose_name="Описание", blank=True, null=True)
     
