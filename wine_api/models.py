@@ -121,7 +121,7 @@ class Wine(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return self.full_name
 
     @property
     def full_name(self):
