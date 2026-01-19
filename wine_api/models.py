@@ -197,8 +197,8 @@ class PersonGrade(models.Model):
 
 class Person(models.Model):
     """Модель персоны"""
-    nickname = models.CharField(max_length=255, verbose_name="Никнейм")
-    phone = models.CharField(max_length=255, verbose_name="Телефон")
+    nickname = models.CharField(max_length=255, verbose_name="Никнейм", unique=True)
+    phone = models.CharField(max_length=255, verbose_name="Телефон", unique=True)
     firstname = models.CharField(max_length=255, verbose_name="Имя")
     lastname = models.CharField(max_length=255, verbose_name="Фамилия")
     grade = models.ForeignKey(PersonGrade, on_delete=models.CASCADE, related_name='persons', verbose_name="Ранг")
