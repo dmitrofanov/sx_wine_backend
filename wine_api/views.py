@@ -22,8 +22,31 @@ class WineViewSet(viewsets.ReadOnlyModelViewSet):
     ViewSet для чтения данных о винах.
     Предоставляет только GET endpoints.
     """
-    queryset = Wine.objects.all()
     serializer_class = WineSerializer
+
+    def get_queryset(self):
+        """
+        Опционально фильтрует вина по пользователю, который ими интересовался.
+        Параметры:
+        - interested_nickname: nickname персоны
+        - interested_person_id: pk персоны
+        """
+        qs = Wine.objects.all()
+
+        interested_nickname = self.request.query_params.get("interested_nickname")
+        interested_person_id = self.request.query_params.get("interested_person_id")
+
+        try:
+            if interested_nickname:
+                person = Person.objects.get(nickname=interested_nickname)
+                qs = qs.filter(interested_persons=person)
+            elif interested_person_id:
+                person = Person.objects.get(pk=interested_person_id)
+                qs = qs.filter(interested_persons=person)
+        except Person.DoesNotExist:
+            return Wine.objects.none()
+
+        return qs
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
@@ -114,6 +137,9 @@ def send_wine_interest_notification(request):
             {'error': f'Вино с ID {wine_id} не найдено'},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    # Сохраняем связь интереса пользователя к вину
+    person.interested_wines.add(wine)
     
     # Формируем сообщение
     message = f"Пользователь {person.nickname} интересуется вином {wine.full_name}"

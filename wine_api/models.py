@@ -202,6 +202,12 @@ class Person(models.Model):
     firstname = models.CharField(max_length=255, verbose_name="Имя")
     lastname = models.CharField(max_length=255, verbose_name="Фамилия")
     grade = models.ForeignKey(PersonGrade, on_delete=models.CASCADE, related_name='persons', verbose_name="Ранг")
+    interested_wines = models.ManyToManyField(
+        Wine,
+        related_name='interested_persons',
+        verbose_name="Вина, которыми интересуется пользователь",
+        blank=True
+    )
 
     class Meta:
         verbose_name = "Персона"
