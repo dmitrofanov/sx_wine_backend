@@ -12,6 +12,7 @@ from telegram.error import TelegramError
 
 from .models import Wine, Event, Person
 from .serializers import WineSerializer, EventSerializer, PersonSerializer
+from .telegram import send_message, BotTokenIsNotSetError
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def send_wine_interest_notification(request):
     - nickname: никнейм пользователя (Person)
     - wine_id: Primary Key вина (Wine)
     
-    Отправляет сообщение в Telegram пользователю с указанным nickname.
+    Отправляет администратору сообщение в Telegram.
     """
     nickname = request.data.get('nickname')
     wine_id = request.data.get('wine_id')
@@ -114,26 +115,11 @@ def send_wine_interest_notification(request):
             status=status.HTTP_404_NOT_FOUND
         )
     
-    # Получаем токен бота из настроек
-    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
-    if not bot_token:
-        logger.error('TELEGRAM_BOT_TOKEN не установлен в переменных окружения')
-        return Response(
-            {'error': 'Токен Telegram бота не настроен'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    
     # Формируем сообщение
     message = f"Пользователь {person.nickname} интересуется вином {wine.full_name}"
-    
+
     try:
-        # Отправляем сообщение через бота
-        bot = Bot(token=bot_token)
-        asyncio.run(bot.send_message(
-            chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
-            text=message
-        ))
-        print('Bot token: ', bot_token)
+        send_message(message)
         return Response(
             {
                 'success': True,
@@ -142,18 +128,92 @@ def send_wine_interest_notification(request):
             },
             status=status.HTTP_200_OK
         )
-    
+    except BotTokenIsNotSetError as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
     except TelegramError as e:
-        logger.error(f'Ошибка при отправке сообщения в Telegram: {e}')
         return Response(
             {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    
     except Exception as e:
-        logger.error(f'Неожиданная ошибка: {e}')
         return Response(
             {'error': f'Внутренняя ошибка сервера: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+@api_view(['POST'])
+def send_event_interest_notification(request):
+    """
+    Endpoint для отправки уведомления о заинтересованности событием в Telegram.
+    
+    Принимает:
+    - nickname: никнейм пользователя (Person)
+    - event_id: Primary Key события (Event)
+    
+    Отправляет администратору сообщение в Telegram.
+    """
+    nickname = request.data.get('nickname')
+    event_id = request.data.get('event_id')
+    
+    # Валидация входных данных
+    if not nickname:
+        return Response(
+            {'error': 'Параметр nickname обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not event_id:
+        return Response(
+            {'error': 'Параметр event_id обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Получаем пользователя по nickname
+        person = Person.objects.get(nickname=nickname)
+    except Person.DoesNotExist:
+        return Response(
+            {'error': f'Пользователь с nickname "{nickname}" не найден'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    try:
+        # Получаем вино по ID
+        event = Event.objects.get(pk=event_id)
+    except Event.DoesNotExist:
+        return Response(
+            {'error': f'Событие с ID {event_id} не найдено'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    message = f"Пользователь {person.nickname} интересуется событием {event.name}"
+    
+    try:
+        send_message(message)
+        return Response(
+            {
+                'success': True,
+                'message': 'Уведомление успешно отправлено',
+                'event': event.name
+            },
+            status=status.HTTP_200_OK
+        )
+    except BotTokenIsNotSetError as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except TelegramError as e:
+        return Response(
+            {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Внутренняя ошибка сервера: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
