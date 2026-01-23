@@ -208,6 +208,12 @@ class Person(models.Model):
         verbose_name="Вина, которыми интересуется пользователь",
         blank=True
     )
+    interested_events = models.ManyToManyField(
+        'Event',
+        related_name='interested_persons',
+        verbose_name="События, которыми интересуется пользователь",
+        blank=True
+    )
 
     class Meta:
         verbose_name = "Персона"

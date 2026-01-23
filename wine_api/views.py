@@ -61,11 +61,15 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         Фильтрация событий по дате:
         - date_before: события с датой <= указанной
         - date_after: события с датой >= указанной
+        - interested_nickname: nickname персоны
+        - interested_person_id: pk персоны
         Формат даты: YYYY-MM-DD.
         """
         qs = Event.objects.all()
         date_before = self.request.query_params.get("date_before")
         date_after = self.request.query_params.get("date_after")
+        interested_nickname = self.request.query_params.get("interested_nickname")
+        interested_person_id = self.request.query_params.get("interested_person_id")
 
         if date_before:
             try:
@@ -80,6 +84,16 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
                 qs = qs.filter(date__gte=parsed)
             except ValueError:
                 pass  # некорректный формат — игнорируем фильтр
+
+        try:
+            if interested_nickname:
+                person = Person.objects.get(nickname=interested_nickname)
+                qs = qs.filter(interested_persons=person)
+            elif interested_person_id:
+                person = Person.objects.get(pk=interested_person_id)
+                qs = qs.filter(interested_persons=person)
+        except Person.DoesNotExist:
+            return Wine.objects.none()
 
         return qs
 
@@ -215,6 +229,9 @@ def send_event_interest_notification(request):
             {'error': f'Событие с ID {event_id} не найдено'},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    # Сохраняем связь интереса пользователя к вину
+    person.interested_events.add(event)
 
     message = f"Пользователь {person.nickname} интересуется событием {event.name}"
     
