@@ -28,20 +28,15 @@ class WineViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Опционально фильтрует вина по пользователю, который ими интересовался.
         Параметры:
-        - interested_nickname: nickname персоны
-        - interested_person_id: pk персоны
+        - interested_telegram_id: telegram_id персоны
         """
         qs = Wine.objects.all()
 
-        interested_nickname = self.request.query_params.get("interested_nickname")
-        interested_person_id = self.request.query_params.get("interested_person_id")
+        interested_telegram_id = self.request.query_params.get("interested_telegram_id")
 
         try:
-            if interested_nickname:
-                person = Person.objects.get(nickname=interested_nickname)
-                qs = qs.filter(interested_persons=person)
-            elif interested_person_id:
-                person = Person.objects.get(pk=interested_person_id)
+            if interested_telegram_id:
+                person = Person.objects.get(telegram_id=interested_telegram_id)
                 qs = qs.filter(interested_persons=person)
         except Person.DoesNotExist:
             return Wine.objects.none()
@@ -61,15 +56,13 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         Фильтрация событий по дате:
         - date_before: события с датой <= указанной
         - date_after: события с датой >= указанной
-        - interested_nickname: nickname персоны
-        - interested_person_id: pk персоны
+        - interested_telegram_id: telegram_id персоны
         Формат даты: YYYY-MM-DD.
         """
         qs = Event.objects.all()
         date_before = self.request.query_params.get("date_before")
         date_after = self.request.query_params.get("date_after")
-        interested_nickname = self.request.query_params.get("interested_nickname")
-        interested_person_id = self.request.query_params.get("interested_person_id")
+        interested_telegram_id = self.request.query_params.get("interested_telegram_id")
 
         if date_before:
             try:
@@ -86,11 +79,8 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
                 pass  # некорректный формат — игнорируем фильтр
 
         try:
-            if interested_nickname:
-                person = Person.objects.get(nickname=interested_nickname)
-                qs = qs.filter(interested_persons=person)
-            elif interested_person_id:
-                person = Person.objects.get(pk=interested_person_id)
+            if interested_telegram_id:
+                person = Person.objects.get(telegram_id=interested_telegram_id)
                 qs = qs.filter(interested_persons=person)
         except Person.DoesNotExist:
             return Wine.objects.none()
@@ -173,18 +163,18 @@ def send_wine_interest_notification(request):
     Endpoint для отправки уведомления о заинтересованности вином в Telegram.
     
     Принимает:
-    - nickname: никнейм пользователя (Person)
+    - telegram_id: telegram_id пользователя (Person)
     - wine_id: Primary Key вина (Wine)
     
     Отправляет администратору сообщение в Telegram.
     """
-    nickname = request.data.get('nickname')
+    telegram_id = request.data.get('telegram_id')
     wine_id = request.data.get('wine_id')
     
     # Валидация входных данных
-    if not nickname:
+    if not telegram_id:
         return Response(
-            {'error': 'Параметр nickname обязателен'},
+            {'error': 'Параметр telegram_id обязателен'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
@@ -195,11 +185,11 @@ def send_wine_interest_notification(request):
         )
     
     try:
-        # Получаем пользователя по nickname
-        person = Person.objects.get(nickname=nickname)
+        # Получаем пользователя по telegram_id
+        person = Person.objects.get(telegram_id=telegram_id)
     except Person.DoesNotExist:
         return Response(
-            {'error': f'Пользователь с nickname "{nickname}" не найден'},
+            {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
             status=status.HTTP_404_NOT_FOUND
         )
     
@@ -216,7 +206,7 @@ def send_wine_interest_notification(request):
     person.interested_wines.add(wine)
     
     # Формируем сообщение
-    message = f"Пользователь {person.nickname} интересуется вином {wine.full_name}"
+    message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется вином {wine.full_name}"
 
     try:
         send_message(message)
@@ -251,18 +241,18 @@ def send_event_interest_notification(request):
     Endpoint для отправки уведомления о заинтересованности событием в Telegram.
     
     Принимает:
-    - nickname: никнейм пользователя (Person)
+    - telegram_id: telegram_id пользователя (Person)
     - event_id: Primary Key события (Event)
     
     Отправляет администратору сообщение в Telegram.
     """
-    nickname = request.data.get('nickname')
+    telegram_id = request.data.get('telegram_id')
     event_id = request.data.get('event_id')
     
     # Валидация входных данных
-    if not nickname:
+    if not telegram_id:
         return Response(
-            {'error': 'Параметр nickname обязателен'},
+            {'error': 'Параметр telegram_id обязателен'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
@@ -273,11 +263,11 @@ def send_event_interest_notification(request):
         )
     
     try:
-        # Получаем пользователя по nickname
-        person = Person.objects.get(nickname=nickname)
+        # Получаем пользователя по telegram_id
+        person = Person.objects.get(telegram_id=telegram_id)
     except Person.DoesNotExist:
         return Response(
-            {'error': f'Пользователь с nickname "{nickname}" не найден'},
+            {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
             status=status.HTTP_404_NOT_FOUND
         )
     
@@ -293,7 +283,7 @@ def send_event_interest_notification(request):
     # Сохраняем связь интереса пользователя к вину
     person.interested_events.add(event)
 
-    message = f"Пользователь {person.nickname} интересуется событием {event.name}"
+    message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется событием {event.name}"
     
     try:
         send_message(message)
