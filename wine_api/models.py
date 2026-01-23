@@ -1,6 +1,8 @@
 from email.policy import default
-from django.db import models
 from datetime import time
+
+from django.db import models
+from django.utils.crypto import get_random_string
 
 class Producer(models.Model):
     """Модель производителя вина"""
@@ -202,6 +204,19 @@ class Person(models.Model):
     firstname = models.CharField(max_length=255, verbose_name="Имя")
     lastname = models.CharField(max_length=255, verbose_name="Фамилия")
     grade = models.ForeignKey(PersonGrade, on_delete=models.CASCADE, related_name='persons', verbose_name="Ранг")
+    telegram_id = models.BigIntegerField(
+        verbose_name="Telegram ID",
+        unique=True,
+        null=True,
+        blank=True,
+    )
+    key = models.CharField(
+        max_length=64,
+        verbose_name="Ключ авторизации",
+        unique=True,
+        null=True,
+        blank=True,
+    )
     interested_wines = models.ManyToManyField(
         Wine,
         related_name='interested_persons',
@@ -222,6 +237,20 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.lastname} {self.firstname} ({self.nickname})"
+
+    def save(self, *args, **kwargs):
+        """
+        При сохранении автоматически генерирует уникальный ключ авторизации,
+        если он ещё не задан.
+        """
+        if not self.key:
+            # Генерируем уникальный ключ
+            while True:
+                candidate = get_random_string(32)
+                if not type(self).objects.filter(key=candidate).exists():
+                    self.key = candidate
+                    break
+        super().save(*args, **kwargs)
 
 
 class Event(models.Model):

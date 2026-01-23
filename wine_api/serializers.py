@@ -127,5 +127,18 @@ class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'nickname', 'phone', 'firstname', 'lastname', 'grade', 'grade_id']
+        fields = [
+            'id',
+            'nickname',
+            'phone',
+            'firstname',
+            'lastname',
+            'grade',
+            'grade_id',
+            'telegram_id',
+            # 'key',
+        ]
+        # extra_kwargs = {
+        #     'key': {'read_only': True},
+        # }
 

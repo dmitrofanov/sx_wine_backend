@@ -108,6 +108,66 @@ class PersonViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+def bind_telegram_id(request):
+    """
+    Endpoint для привязки Telegram user ID к персоне по одноразовому ключу.
+
+    Принимает:
+    - telegram_id: Telegram user ID (число)
+    - key: одноразовый ключ, выданный пользователю
+    """
+    telegram_id = request.data.get('telegram_id')
+    key = request.data.get('key')
+
+    # Валидация входных данных
+    if telegram_id is None:
+        return Response(
+            {'error': 'Параметр telegram_id обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not key:
+        return Response(
+            {'error': 'Параметр key обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Пробуем привести telegram_id к числу
+    try:
+        telegram_id_int = int(telegram_id)
+    except (TypeError, ValueError):
+        return Response(
+            {'error': 'Параметр telegram_id должен быть целым числом'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Находим персону по ключу
+    try:
+        person = Person.objects.get(key=key)
+    except Person.DoesNotExist:
+        return Response(
+            {'error': 'Персона с указанным key не найдена'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Проверяем, что этот telegram_id ещё не занят другой персоной
+    existing_with_telegram = Person.objects.filter(telegram_id=telegram_id_int).exclude(pk=person.pk).first()
+    if existing_with_telegram:
+        return Response(
+            {'error': 'Указанный telegram_id уже привязан к другой персоне'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Привязываем telegram_id и аннулируем использованный ключ (одноразовый ключ)
+    person.telegram_id = telegram_id_int
+    person.key = None
+    person.save(update_fields=['telegram_id', 'key'])
+
+    serializer = PersonSerializer(person)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
 def send_wine_interest_notification(request):
     """
     Endpoint для отправки уведомления о заинтересованности вином в Telegram.

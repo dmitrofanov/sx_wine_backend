@@ -136,7 +136,7 @@ class PersonAdmin(admin.ModelAdmin):
     search_fields = ['nickname', 'firstname', 'lastname', 'phone']
     fieldsets = (
         ('Основная информация', {
-            'fields': ('nickname', 'firstname', 'lastname', 'phone', 'grade')
+            'fields': ('nickname', 'firstname', 'lastname', 'phone', 'grade', 'telegram_id', 'key')
         }),
     )
 
