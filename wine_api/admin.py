@@ -69,6 +69,9 @@ class WineAdmin(admin.ModelAdmin):
         ('Цена', {
             'fields': ('price',)
         }),
+        ('Выдержка на осадке', {
+            'fields': ('sur_lie_years', 'sur_lie_months')
+        }),
     )
 
     def full_name(self, obj):

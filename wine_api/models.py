@@ -116,6 +116,8 @@ class Wine(models.Model):
     aging = models.IntegerField(verbose_name="Год производства", blank=True, null=True)
     aging_caption = models.CharField(max_length=255,verbose_name="Описание года производства", blank=True, null=True)
     description = models.TextField(verbose_name="Описание", blank=True, null=True)
+    sur_lie_years = models.IntegerField(verbose_name="Выдержка на осадке (лет)", blank=True, null=True)
+    sur_lie_months = models.IntegerField(verbose_name="Выдержка на осадке (месяцев)", blank=True, null=True)
     
 
     class Meta:

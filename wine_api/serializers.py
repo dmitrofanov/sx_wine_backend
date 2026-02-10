@@ -91,7 +91,7 @@ class WineSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'full_name', 'image', 'category', 'sugar', 'color',
             'country', 'region', 'volume', 'producer', 'price',
-            'aging', 'aging_caption', 'description', 'grape_variety'   
+            'aging', 'aging_caption', 'description', 'grape_variety', 'sur_lie_years', 'sur_lie_months'   
         ]
 
 
