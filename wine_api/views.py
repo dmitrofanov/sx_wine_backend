@@ -29,10 +29,12 @@ class WineViewSet(viewsets.ReadOnlyModelViewSet):
         Опционально фильтрует вина по пользователю, который ими интересовался.
         Параметры:
         - interested_telegram_id: telegram_id персоны
+        - producer_id: ID производителя вина
         """
         qs = Wine.objects.all()
 
         interested_telegram_id = self.request.query_params.get("interested_telegram_id")
+        producer_id = self.request.query_params.get("producer_id")
 
         try:
             if interested_telegram_id:
@@ -40,6 +42,14 @@ class WineViewSet(viewsets.ReadOnlyModelViewSet):
                 qs = qs.filter(interested_persons=person)
         except Person.DoesNotExist:
             return Wine.objects.none()
+
+        if producer_id:
+            try:
+                producer_id_int = int(producer_id)
+                qs = qs.filter(producer_id=producer_id_int)
+            except (TypeError, ValueError):
+                # Некорректный ID производителя — игнорируем фильтр
+                pass
 
         return qs
 
