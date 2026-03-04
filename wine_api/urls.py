@@ -5,12 +5,14 @@ from .views import (
     EventViewSet,
     PersonViewSet,
     GradeViewSet,
+    ProducerViewSet,
     send_wine_interest_notification,
     send_event_interest_notification,
     bind_telegram_id,
 )
 
 router = DefaultRouter()
+router.register(r'producers', ProducerViewSet, basename='producer')
 router.register(r'wines', WineViewSet, basename='wine')
 router.register(r'events', EventViewSet, basename='event')
 router.register(r'persons', PersonViewSet, basename='person')

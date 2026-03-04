@@ -23,6 +23,13 @@ class ProducerSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
 
 
+class ProducerListSerializer(serializers.ModelSerializer):
+    """Сериализатор для списка Producer (только name и description)"""
+    class Meta:
+        model = Producer
+        fields = ['id', 'name', 'description']
+
+
 class WineCategorySerializer(serializers.ModelSerializer):
     """Сериализатор для WineCategory (используется во вложенных объектах)"""
     class Meta:
@@ -103,6 +110,15 @@ class WineSerializer(serializers.ModelSerializer):
             'country', 'region', 'volume', 'producer', 'price',
             'aging', 'aging_caption', 'description', 'grape_variety', 'sur_lie_years', 'sur_lie_months'   
         ]
+
+
+class ProducerDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор для детальной информации Producer (включая вина)"""
+    wines = WineSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Producer
+        fields = ['id', 'name', 'description', 'wines']
 
 
 class EventSerializer(serializers.ModelSerializer):

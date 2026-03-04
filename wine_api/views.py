@@ -10,11 +10,32 @@ from django.conf import settings
 from telegram import Bot
 from telegram.error import TelegramError
 
-from .models import Wine, Event, Person, PersonGrade
-from .serializers import WineSerializer, EventSerializer, PersonSerializer, GradeSerializer
+from .models import Wine, Event, Person, PersonGrade, Producer
+from .serializers import (
+    WineSerializer,
+    EventSerializer,
+    PersonSerializer,
+    GradeSerializer,
+    ProducerListSerializer,
+    ProducerDetailSerializer,
+)
 from .telegram import send_message, BotTokenIsNotSetError
 
 logger = logging.getLogger(__name__)
+
+
+class ProducerViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для чтения данных о производителях.
+    List: только name и description.
+    Detail: полная информация включая список вин.
+    """
+    queryset = Producer.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return ProducerDetailSerializer
+        return ProducerListSerializer
 
 
 class WineViewSet(viewsets.ReadOnlyModelViewSet):
