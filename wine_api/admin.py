@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Producer, WineCategory, WineColor, WineSugar,
     Country, Region, Wine, City, Event, GrapeVariety, WineGrapeComposition,
-    PersonGrade, Person
+    PersonGrade, Person, Feature, Subscription
 )
 
 
@@ -124,6 +124,38 @@ class EventAdmin(admin.ModelAdmin):
             'fields': ('producer', 'wine_list', 'participants')
         }),
     )
+
+
+@admin.register(Feature)
+class FeatureAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at', 'updated_at']
+    search_fields = ['name', 'description']
+    readonly_fields = ['created_at', 'updated_at']
+    list_filter = ['created_at']
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price', 'created_at', 'updated_at', 'get_features_count']
+    search_fields = ['name', 'description']
+    list_filter = ['created_at', 'price']
+    filter_horizontal = ['features']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('name', 'description', 'price')
+        }),
+        ('Фичи', {
+            'fields': ('features',)
+        }),
+        ('Даты', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+
+    def get_features_count(self, obj):
+        return obj.features.count()
+    get_features_count.short_description = "Количество фич"
 
 
 @admin.register(PersonGrade)

@@ -296,6 +296,49 @@ class Person(models.Model):
         super().save(*args, **kwargs)
 
 
+class Feature(models.Model):
+    """Модель фичи подписки"""
+    name = models.CharField(max_length=200, verbose_name="Название", unique=True)
+    description = models.TextField(verbose_name="Описание", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Фича"
+        verbose_name_plural = "Фичи"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Subscription(models.Model):
+    """Модель подписки"""
+    name = models.CharField(max_length=100, verbose_name="Название", unique=True)
+    description = models.TextField(verbose_name="Описание", blank=True)
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Цена"
+    )
+    features = models.ManyToManyField(
+        Feature,
+        related_name='subscriptions',
+        verbose_name="Фичи",
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Event(models.Model):
     """Модель события"""
     name = models.CharField(max_length=255, verbose_name="Название")
