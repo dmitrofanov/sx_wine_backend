@@ -10,8 +10,8 @@ from django.conf import settings
 from telegram import Bot
 from telegram.error import TelegramError
 
-from .models import Wine, Event, Person
-from .serializers import WineSerializer, EventSerializer, PersonSerializer
+from .models import Wine, Event, Person, PersonGrade
+from .serializers import WineSerializer, EventSerializer, PersonSerializer, GradeSerializer
 from .telegram import send_message, BotTokenIsNotSetError
 
 logger = logging.getLogger(__name__)
@@ -95,6 +95,16 @@ class PersonViewSet(viewsets.ModelViewSet):
     """
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
+
+
+class GradeViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для чтения данных о грейдах пользователей.
+    Предоставляет только GET endpoints.
+    """
+
+    queryset = PersonGrade.objects.all().order_by("required_tastings", "name")
+    serializer_class = GradeSerializer
 
 
 @api_view(['POST'])

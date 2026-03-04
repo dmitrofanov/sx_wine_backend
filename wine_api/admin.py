@@ -128,18 +128,23 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(PersonGrade)
 class PersonGradeAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'required_tastings', 'next_grade']
     search_fields = ['name']
 
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['nickname', 'firstname', 'lastname', 'phone', 'grade']
-    list_filter = ['grade']
+    list_display = ['nickname', 'firstname', 'lastname', 'phone', 'get_grade', 'visited_tastings']
+    list_filter = []
     search_fields = ['nickname', 'firstname', 'lastname', 'phone']
     fieldsets = (
         ('Основная информация', {
-            'fields': ('nickname', 'firstname', 'lastname', 'phone', 'grade', 'telegram_id', 'key')
+            'fields': ('nickname', 'firstname', 'lastname', 'phone', 'telegram_id', 'key')
         }),
     )
+
+    def get_grade(self, obj):
+        return obj.grade.name if obj.grade else None
+
+    get_grade.short_description = "Грейд"
 

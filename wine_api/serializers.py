@@ -1,8 +1,18 @@
 from rest_framework import serializers
 from .models import (
-    Producer, WineCategory, WineSugar, Country, Region,
-    Wine, City, Event, GrapeVariety, WineGrapeComposition,
-    PersonGrade, Person, WineColor
+    Producer,
+    WineCategory,
+    WineSugar,
+    Country,
+    Region,
+    Wine,
+    City,
+    Event,
+    GrapeVariety,
+    WineGrapeComposition,
+    PersonGrade,
+    Person,
+    WineColor,
 )
 
 
@@ -109,21 +119,42 @@ class EventSerializer(serializers.ModelSerializer):
         ]
 
 
-class PersonGradeSerializer(serializers.ModelSerializer):
-    """Сериализатор для PersonGrade (используется во вложенных объектах)"""
+class GradeSerializer(serializers.ModelSerializer):
+    """Сериализатор для грейда персоны"""
+
+    next_grade_id = serializers.PrimaryKeyRelatedField(
+        source="next_grade",
+        queryset=PersonGrade.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    next_grade = serializers.PrimaryKeyRelatedField(read_only=True)
+    next_grade_name = serializers.CharField(
+        source="next_grade.name", read_only=True, allow_null=True
+    )
+    next_grade_required_tastings = serializers.IntegerField(
+        source="next_grade.required_tastings", read_only=True, allow_null=True
+    )
+
     class Meta:
         model = PersonGrade
-        fields = ['id', 'name']
+        fields = [
+            "id",
+            "name",
+            "required_tastings",
+            "bonuses",
+            "next_grade",
+            "next_grade_id",
+            "next_grade_name",
+            "next_grade_required_tastings",
+        ]
 
 
 class PersonSerializer(serializers.ModelSerializer):
     """Сериализатор для Person"""
-    grade = PersonGradeSerializer(read_only=True)
-    grade_id = serializers.PrimaryKeyRelatedField(
-        queryset=PersonGrade.objects.all(),
-        source='grade',
-        write_only=True
-    )
+    grade = GradeSerializer(read_only=True)
+    visited_tastings = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Person
@@ -134,7 +165,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'firstname',
             'lastname',
             'grade',
-            'grade_id',
+            'visited_tastings',
             'telegram_id',
             # 'key',
         ]

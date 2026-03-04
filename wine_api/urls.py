@@ -4,6 +4,7 @@ from .views import (
     WineViewSet,
     EventViewSet,
     PersonViewSet,
+    GradeViewSet,
     send_wine_interest_notification,
     send_event_interest_notification,
     bind_telegram_id,
@@ -13,6 +14,7 @@ router = DefaultRouter()
 router.register(r'wines', WineViewSet, basename='wine')
 router.register(r'events', EventViewSet, basename='event')
 router.register(r'persons', PersonViewSet, basename='person')
+router.register(r'grades', GradeViewSet, basename='grade')
 
 urlpatterns = [
     path('', include(router.urls)),

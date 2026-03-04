@@ -187,8 +187,26 @@ class City(models.Model):
 
 
 class PersonGrade(models.Model):
-    """Модель ранга персоны"""
+    """Модель ранга / грейда персоны"""
     name = models.CharField(max_length=255, verbose_name="Имя ранга")
+    required_tastings = models.IntegerField(
+        verbose_name="Необходимое количество дегустаций",
+        help_text="Минимальное количество посещённых дегустаций для получения этого грейда",
+        default=0,
+    )
+    next_grade = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="previous_grades",
+        verbose_name="Следующий грейд",
+        null=True,
+        blank=True,
+    )
+    bonuses = models.TextField(
+        verbose_name="Бонусы за грейд",
+        blank=True,
+        help_text="Описание бонусов, доступных на этом уровне грейда",
+    )
 
     class Meta:
         verbose_name = "Ранг персоны"
@@ -205,7 +223,6 @@ class Person(models.Model):
     phone = models.CharField(max_length=255, verbose_name="Телефон", unique=True)
     firstname = models.CharField(max_length=255, verbose_name="Имя")
     lastname = models.CharField(max_length=255, verbose_name="Фамилия")
-    grade = models.ForeignKey(PersonGrade, on_delete=models.CASCADE, related_name='persons', verbose_name="Ранг")
     telegram_id = models.BigIntegerField(
         verbose_name="Telegram ID",
         unique=True,
@@ -239,6 +256,30 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.lastname} {self.firstname} ({self.nickname})"
+
+    @property
+    def visited_tastings(self) -> int:
+        """
+        Количество посещённых дегустаций (событий), в которых персона указана
+        в списке участников.
+        """
+        return self.events.count()
+
+    @property
+    def grade(self):
+        """
+        Текущий грейд персоны, вычисляемый динамически на основе количества
+        посещенных дегустаций.
+
+        Выбирается грейд с максимальным required_tastings, который меньше либо
+        равен текущему числу посещённых дегустаций.
+        """
+        visited = self.visited_tastings
+        return (
+            PersonGrade.objects.filter(required_tastings__lte=visited)
+            .order_by("-required_tastings")
+            .first()
+        )
 
     def save(self, *args, **kwargs):
         """
