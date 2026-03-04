@@ -166,7 +166,8 @@ class PersonSerializer(serializers.ModelSerializer):
             'lastname',
             'grade',
             'visited_tastings',
-            'telegram_id',
+            'telegram_id', 
+            'is_gold_member',
             # 'key',
         ]
         # extra_kwargs = {

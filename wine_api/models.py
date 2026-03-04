@@ -249,6 +249,11 @@ class Person(models.Model):
         blank=True
     )
 
+    is_gold_member = models.BooleanField(
+        verbose_name="Является золотом членом",
+        default=False,
+    )
+
     class Meta:
         verbose_name = "Персона"
         verbose_name_plural = "Персоны"

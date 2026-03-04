@@ -173,6 +173,9 @@ class PersonAdmin(admin.ModelAdmin):
         ('Основная информация', {
             'fields': ('nickname', 'firstname', 'lastname', 'phone', 'telegram_id', 'key')
         }),
+        ('Подписка', {
+            'fields': ('is_gold_member',)
+        }),
     )
 
     def get_grade(self, obj):
