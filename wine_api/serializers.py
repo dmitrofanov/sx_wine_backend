@@ -143,7 +143,7 @@ class GradeSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "required_tastings",
-            "bonuses",
+            "description",
             "next_grade",
             "next_grade_id",
             "next_grade_name",

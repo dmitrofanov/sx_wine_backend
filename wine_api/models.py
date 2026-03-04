@@ -202,10 +202,10 @@ class PersonGrade(models.Model):
         null=True,
         blank=True,
     )
-    bonuses = models.TextField(
-        verbose_name="Бонусы за грейд",
+    description = models.TextField(
+        verbose_name="Описание грейда",
         blank=True,
-        help_text="Описание бонусов, доступных на этом уровне грейда",
+        help_text="Описание грейда",
     )
 
     class Meta:
