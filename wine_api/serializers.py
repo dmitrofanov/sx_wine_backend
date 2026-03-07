@@ -176,13 +176,13 @@ class PersonSerializer(serializers.ModelSerializer):
         model = Person
         fields = [
             'id',
-            'nickname',
-            'phone',
+            # 'nickname',
+            # 'phone',
             'firstname',
             'lastname',
             'grade',
             'visited_tastings',
-            'telegram_id', 
+            # 'telegram_id', 
             'is_gold_member',
             # 'key',
         ]
