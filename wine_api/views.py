@@ -24,6 +24,26 @@ from .telegram import send_message, BotTokenIsNotSetError
 logger = logging.getLogger(__name__)
 
 
+@api_view(['GET'])
+def is_valid_user(request):
+    """
+    Проверяет существование персоны с указанным telegram_id.
+    Query параметр: telegram_id
+    Возвращает "OK", если персона существует, иначе "NOT OK".
+    """
+    telegram_id = request.query_params.get('telegram_id')
+    if telegram_id is None:
+        return Response('NOT OK')
+
+    try:
+        telegram_id_int = int(telegram_id)
+    except (TypeError, ValueError):
+        return Response('NOT OK')
+
+    exists = Person.objects.filter(telegram_id=telegram_id_int).exists()
+    return Response('OK' if exists else 'NOT OK')
+
+
 class ProducerViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet для чтения данных о производителях.
