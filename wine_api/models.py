@@ -209,8 +209,8 @@ class PersonGrade(models.Model):
     )
 
     class Meta:
-        verbose_name = "Ранг персоны"
-        verbose_name_plural = "Ранги персон"
+        verbose_name = "Грейд"
+        verbose_name_plural = "Грейды"
         ordering = ['name']
 
     def __str__(self):
@@ -255,8 +255,8 @@ class Person(models.Model):
     )
 
     class Meta:
-        verbose_name = "Персона"
-        verbose_name_plural = "Персоны"
+        verbose_name = "Пользователь приложения"
+        verbose_name_plural = "Пользователи приложения"
         ordering = ['lastname', 'firstname']
 
     def __str__(self):
@@ -309,8 +309,8 @@ class Feature(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     class Meta:
-        verbose_name = "Фича"
-        verbose_name_plural = "Фичи"
+        verbose_name = "Фича по подписке"
+        verbose_name_plural = "Фичи по подпискам"
         ordering = ['name']
 
     def __str__(self):
