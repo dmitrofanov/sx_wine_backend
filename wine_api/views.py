@@ -10,7 +10,7 @@ from django.conf import settings
 from telegram import Bot
 from telegram.error import TelegramError
 
-from .models import Wine, Event, Person, PersonGrade, Producer
+from .models import Wine, Event, Person, PersonGrade, Producer, Subscription
 from .serializers import (
     WineSerializer,
     EventSerializer,
@@ -18,6 +18,7 @@ from .serializers import (
     GradeSerializer,
     ProducerListSerializer,
     ProducerDetailSerializer,
+    SubscriptionSerializer,
 )
 from .telegram import send_message, BotTokenIsNotSetError
 
@@ -156,6 +157,16 @@ class GradeViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = PersonGrade.objects.all().order_by("required_tastings", "name")
     serializer_class = GradeSerializer
+
+
+class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для чтения данных о подписках.
+    Предоставляет только GET endpoints.
+    """
+
+    queryset = Subscription.objects.all().order_by("name")
+    serializer_class = SubscriptionSerializer
 
 
 @api_view(['POST'])

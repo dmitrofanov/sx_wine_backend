@@ -6,6 +6,7 @@ from .views import (
     PersonViewSet,
     GradeViewSet,
     ProducerViewSet,
+    SubscriptionViewSet,
     send_wine_interest_notification,
     send_event_interest_notification,
     bind_telegram_id,
@@ -18,6 +19,7 @@ router.register(r'wines', WineViewSet, basename='wine')
 router.register(r'events', EventViewSet, basename='event')
 router.register(r'persons', PersonViewSet, basename='person')
 router.register(r'grades', GradeViewSet, basename='grade')
+router.register(r'subscriptions', SubscriptionViewSet, basename='subscription')
 
 urlpatterns = [
     path('', include(router.urls)),

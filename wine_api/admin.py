@@ -143,7 +143,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'description', 'price')
+            'fields': ('name', 'description', 'price', 'duration')
         }),
         ('Фичи', {
             'fields': ('features',)
@@ -166,15 +166,15 @@ class PersonGradeAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['nickname', 'firstname', 'lastname', 'phone', 'get_grade', 'visited_tastings']
-    list_filter = []
+    list_display = ['nickname', 'firstname', 'lastname', 'phone', 'subscription', 'subscription_starts_at', 'get_grade', 'visited_tastings']
+    list_filter = ['subscription']
     search_fields = ['nickname', 'firstname', 'lastname', 'phone']
     fieldsets = (
         ('Основная информация', {
             'fields': ('nickname', 'firstname', 'lastname', 'phone', 'telegram_id', 'key')
         }),
         ('Подписка', {
-            'fields': ('is_gold_member',)
+            'fields': ('is_gold_member', 'subscription', 'subscription_starts_at')
         }),
     )
 

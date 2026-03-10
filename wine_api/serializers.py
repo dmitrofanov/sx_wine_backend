@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Producer,
+    Subscription,
     WineCategory,
     WineSugar,
     Country,
@@ -13,6 +14,8 @@ from .models import (
     PersonGrade,
     Person,
     WineColor,
+    Feature,
+    Subscription,
 )
 
 
@@ -184,6 +187,8 @@ class PersonSerializer(serializers.ModelSerializer):
             'visited_tastings',
             'telegram_id', 
             'is_gold_member',
+            'subscription',
+            'subscription_starts_at',           
             # 'key',
         ]
         extra_kwargs = {
@@ -191,3 +196,18 @@ class PersonSerializer(serializers.ModelSerializer):
             'telegram_id': {'write_only': True},
         }
 
+
+class FeatureSerializer(serializers.ModelSerializer):
+    """Сериализатор для Feature"""
+    class Meta:
+        model = Feature
+        fields = ['id', 'name', 'description']
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор для Subscription"""
+    features = FeatureSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Subscription
+        fields = ['id', 'name', 'description', 'price', 'duration', 'features']

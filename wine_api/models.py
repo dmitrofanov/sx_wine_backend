@@ -254,6 +254,21 @@ class Person(models.Model):
         default=False,
     )
 
+    subscription = models.ForeignKey(
+        'Subscription',
+        on_delete=models.SET_NULL,
+        related_name='persons',
+        verbose_name="Подписка",
+        null=True,
+        blank=True,
+    )
+    subscription_starts_at = models.DateField(
+        verbose_name="Дата начала подписки",
+        help_text="Дата, с которой подписка действует для персоны",
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         verbose_name = "Пользователь приложения"
         verbose_name_plural = "Пользователи приложения"
@@ -332,6 +347,7 @@ class Subscription(models.Model):
         verbose_name="Фичи",
         blank=True
     )
+    duration = models.IntegerField(verbose_name="Продолжительность (месяцев)", default=1, help_text="Продолжительность подписки в месяцах")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
