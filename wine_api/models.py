@@ -250,7 +250,7 @@ class Person(models.Model):
     )
 
     is_gold_member = models.BooleanField(
-        verbose_name="Является золотом членом",
+        verbose_name="Является золотым членом клуба",
         default=False,
     )
 
