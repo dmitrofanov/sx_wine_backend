@@ -145,9 +145,23 @@ class PersonViewSet(viewsets.ModelViewSet):
     ViewSet для работы с персонами.
     Предоставляет GET, POST, PUT, PATCH, DELETE endpoints.
     """
-    queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
+    def get_queryset(self):
+        """
+        Фильтрация персон по telegram_id..
+        """
+        qs = Person.objects.all()
+        telegram_id = self.request.query_params.get("telegram_id")
+
+        if telegram_id:
+            try:
+                telegram_id_int = int(telegram_id)
+                qs = qs.filter(telegram_id=telegram_id_int)
+            except (TypeError, ValueError):
+                pass  # некорректный формат — игнорируем фильтр
+
+        return qs
 
 class GradeViewSet(viewsets.ReadOnlyModelViewSet):
     """
