@@ -396,3 +396,76 @@ def send_event_interest_notification(request):
             {'error': f'Внутренняя ошибка сервера: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['POST'])
+def send_subscription_interest_notification(request):
+    """
+    Endpoint для отправки уведомления о заинтересованности подпиской в Telegram.
+    
+    Принимает:
+    - telegram_id: telegram_id пользователя (Person)
+    - subscription_id: Primary Key подписки (Subscription)
+    
+    Отправляет администратору сообщение в Telegram.
+    """
+    telegram_id = request.data.get('telegram_id')
+    subscription_id = request.data.get('subscription_id')
+    
+    # Валидация входных данных
+    if not telegram_id:
+        return Response(
+            {'error': 'Параметр telegram_id обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not subscription_id:
+        return Response(
+            {'error': 'Параметр subscription_id обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Получаем пользователя по telegram_id
+        person = Person.objects.get(telegram_id=telegram_id)
+    except Person.DoesNotExist:
+        return Response(
+            {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    try:
+        # Получаем вино по ID
+        subscription = Subscription.objects.get(pk=subscription_id)
+    except Event.DoesNotExist:
+        return Response(
+            {'error': f'Подписка с ID {subscription_id} не найдена'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется подпиской {subscription.name}"
+    
+    try:
+        send_message(message)
+        return Response(
+            {
+                'success': True,
+                'message': 'Уведомление успешно отправлено',
+                'subscription': subscription.name
+            },
+            status=status.HTTP_200_OK
+        )
+    except BotTokenIsNotSetError as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except TelegramError as e:
+        return Response(
+            {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Внутренняя ошибка сервера: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
