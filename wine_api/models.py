@@ -118,7 +118,10 @@ class Wine(models.Model):
     description = models.TextField(verbose_name="Описание", blank=True, null=True)
     sur_lie_years = models.IntegerField(verbose_name="Выдержка на осадке (лет)", blank=True, null=True)
     sur_lie_months = models.IntegerField(verbose_name="Выдержка на осадке (месяцев)", blank=True, null=True)
-    
+    is_prime = models.BooleanField(
+        verbose_name="Только по платной подписке",
+        default=False,
+    )
 
     class Meta:
         verbose_name = "Вино"
@@ -248,12 +251,6 @@ class Person(models.Model):
         verbose_name="События, которыми интересуется пользователь",
         blank=True
     )
-
-    is_gold_member = models.BooleanField(
-        verbose_name="Является золотым членом клуба",
-        default=False,
-    )
-
     subscription = models.ForeignKey(
         'Subscription',
         on_delete=models.SET_NULL,
@@ -374,6 +371,10 @@ class Event(models.Model):
     image = models.ImageField(upload_to='events/', verbose_name="Изображение")
     wine_list = models.ManyToManyField(Wine, related_name='events', verbose_name="Список вин", blank=True)
     participants = models.ManyToManyField(Person, related_name='events', verbose_name="Список участников", blank=True)
+    is_prime = models.BooleanField(
+        verbose_name="Только по платной подписке",
+        default=False,
+    )
 
     class Meta:
         verbose_name = "Событие"

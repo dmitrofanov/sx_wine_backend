@@ -110,8 +110,8 @@ class WineSerializer(serializers.ModelSerializer):
         model = Wine
         fields = [
             'id', 'name', 'full_name', 'image', 'category', 'sugar', 'color',
-            'country', 'region', 'volume', 'producer', 'price',
-            'aging', 'aging_caption', 'description', 'grape_variety', 'sur_lie_years', 'sur_lie_months'   
+            'country', 'region', 'volume', 'is_prime', 'producer', 'price',
+            'aging', 'aging_caption', 'description', 'grape_variety', 'sur_lie_years', 'sur_lie_months',   
         ]
 
 
@@ -134,7 +134,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id', 'name', 'date', 'time', 'city', 'place', 'address',
-            'price', 'available', 'producer', 'image', 'wine_list', 'participants'
+            'price', 'available', 'is_prime', 'producer', 'image', 'wine_list', 'participants',
         ]
 
 
@@ -169,34 +169,6 @@ class GradeSerializer(serializers.ModelSerializer):
             "next_grade_required_tastings",
         ]
 
-
-class PersonSerializer(serializers.ModelSerializer):
-    """Сериализатор для Person"""
-    grade = GradeSerializer(read_only=True)
-    visited_tastings = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Person
-        fields = [
-            'id',
-            # 'nickname',
-            # 'phone',
-            'firstname',
-            'lastname',
-            'grade',
-            'visited_tastings',
-            'telegram_id', 
-            'is_gold_member',
-            'subscription',
-            'subscription_starts_at',           
-            # 'key',
-        ]
-        extra_kwargs = {
-            # 'key': {'read_only': True},
-            'telegram_id': {'write_only': True},
-        }
-
-
 class FeatureSerializer(serializers.ModelSerializer):
     """Сериализатор для Feature"""
     class Meta:
@@ -211,3 +183,29 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = ['id', 'name', 'description', 'price', 'duration', 'features']
+
+class PersonSerializer(serializers.ModelSerializer):
+    """Сериализатор для Person"""
+    grade = GradeSerializer(read_only=True)
+    visited_tastings = serializers.IntegerField(read_only=True)
+    subscription = SubscriptionSerializer(read_only=True)
+
+    class Meta:
+        model = Person
+        fields = [
+            'id',
+            # 'nickname',
+            # 'phone',
+            'firstname',
+            'lastname',
+            'grade',
+            'visited_tastings',
+            'telegram_id',
+            'subscription',
+            'subscription_starts_at',           
+            # 'key',
+        ]
+        extra_kwargs = {
+            # 'key': {'read_only': True},
+            'telegram_id': {'write_only': True},
+        }

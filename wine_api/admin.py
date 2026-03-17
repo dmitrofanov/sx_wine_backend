@@ -72,6 +72,9 @@ class WineAdmin(admin.ModelAdmin):
         ('Выдержка на осадке', {
             'fields': ('sur_lie_years', 'sur_lie_months')
         }),
+        ('Подписки', {
+            'fields': ('is_prime',)
+        }),
     )
 
     def full_name(self, obj):
@@ -122,6 +125,9 @@ class EventAdmin(admin.ModelAdmin):
         }),
         ('Связанные объекты', {
             'fields': ('producer', 'wine_list', 'participants')
+        }),
+        ('Подписки', {
+            'fields': ('is_prime',)
         }),
     )
 
@@ -174,7 +180,7 @@ class PersonAdmin(admin.ModelAdmin):
             'fields': ('nickname', 'firstname', 'lastname', 'phone', 'telegram_id', 'key')
         }),
         ('Подписка', {
-            'fields': ('is_gold_member', 'subscription', 'subscription_starts_at')
+            'fields': ('subscription', 'subscription_starts_at')
         }),
     )
 
