@@ -333,11 +333,7 @@ class Subscription(models.Model):
     """Модель подписки"""
     name = models.CharField(max_length=100, verbose_name="Название", unique=True)
     description = models.TextField(verbose_name="Описание", blank=True)
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name="Цена"
-    )
+    price = models.IntegerField(verbose_name="Цена", default=0, help_text="Цена")
     features = models.ManyToManyField(
         Feature,
         related_name='subscriptions',

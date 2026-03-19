@@ -109,12 +109,14 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         - date_before: события с датой <= указанной
         - date_after: события с датой >= указанной
         - interested_telegram_id: telegram_id персоны
+        - participant_telegram_id: telegram_id персоны
         Формат даты: YYYY-MM-DD.
         """
         qs = Event.objects.all()
         date_before = self.request.query_params.get("date_before")
         date_after = self.request.query_params.get("date_after")
         interested_telegram_id = self.request.query_params.get("interested_telegram_id")
+        participant_telegram_id = self.request.query_params.get("participant_telegram_id")
 
         if date_before:
             try:
@@ -135,7 +137,15 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
                 person = Person.objects.get(telegram_id=interested_telegram_id)
                 qs = qs.filter(interested_persons=person)
         except Person.DoesNotExist:
-            return Wine.objects.none()
+            return Event.objects.none()
+
+
+        try:
+            if participant_telegram_id:
+                person = Person.objects.get(telegram_id=participant_telegram_id)
+                qs = qs.filter(participants=person)
+        except Person.DoesNotExist:
+            return Event.objects.none()
 
         return qs
 

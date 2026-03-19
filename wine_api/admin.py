@@ -182,6 +182,10 @@ class PersonAdmin(admin.ModelAdmin):
         ('Подписка', {
             'fields': ('subscription', 'subscription_starts_at')
         }),
+        ('Интересовался', {
+            'fields': ('interested_wines', 'interested_events')
+        }),
+        
     )
 
     def get_grade(self, obj):
