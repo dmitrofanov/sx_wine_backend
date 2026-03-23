@@ -12,6 +12,7 @@ from .views import (
     bind_telegram_id,
     is_valid_user,
     send_subscription_interest_notification,
+    send_subscribe_notification,
 )
 
 router = DefaultRouter()
@@ -27,6 +28,7 @@ urlpatterns = [
     path('notifications/wine-interest/', send_wine_interest_notification, name='wine-interest-notification'),
     path('notifications/event-interest/', send_event_interest_notification, name='event-interest-notification'),
     path('notifications/subscription-interest/', send_subscription_interest_notification, name='subscription-interest-notification'),
+    path('notifications/subscribe-interest/', send_subscribe_notification, name='subscribe-interest-notification'),
     path('auth/bind-telegram/', bind_telegram_id, name='bind-telegram-id'),
     path('auth/is_valid_user/', is_valid_user, name='is-valid-user'),
 ]

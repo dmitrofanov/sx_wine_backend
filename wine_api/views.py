@@ -3,7 +3,7 @@ import os
 import logging
 import asyncio
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status as rest_status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.conf import settings
@@ -20,7 +20,7 @@ from .serializers import (
     ProducerDetailSerializer,
     SubscriptionSerializer,
 )
-from .telegram import send_message, BotTokenIsNotSetError
+from .telegram import handle_message, BotTokenIsNotSetError
 
 logger = logging.getLogger(__name__)
 
@@ -209,13 +209,13 @@ def bind_telegram_id(request):
     if telegram_id is None:
         return Response(
             {'error': 'Параметр telegram_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
 
     if not key:
         return Response(
             {'error': 'Параметр key обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
 
     # Пробуем привести telegram_id к числу
@@ -224,7 +224,7 @@ def bind_telegram_id(request):
     except (TypeError, ValueError):
         return Response(
             {'error': 'Параметр telegram_id должен быть целым числом'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
 
     # Находим персону по ключу
@@ -233,7 +233,7 @@ def bind_telegram_id(request):
     except Person.DoesNotExist:
         return Response(
             {'error': 'Персона с указанным key не найдена'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
 
     # Проверяем, что этот telegram_id ещё не занят другой персоной
@@ -241,7 +241,7 @@ def bind_telegram_id(request):
     if existing_with_telegram:
         return Response(
             {'error': 'Указанный telegram_id уже привязан к другой персоне'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
 
     # Привязываем telegram_id и аннулируем использованный ключ (одноразовый ключ)
@@ -250,7 +250,7 @@ def bind_telegram_id(request):
     person.save(update_fields=['telegram_id', 'key'])
 
     serializer = PersonSerializer(person)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.data, status=rest_status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -271,13 +271,13 @@ def send_wine_interest_notification(request):
     if not telegram_id:
         return Response(
             {'error': 'Параметр telegram_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     if not wine_id:
         return Response(
             {'error': 'Параметр wine_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     try:
@@ -286,7 +286,7 @@ def send_wine_interest_notification(request):
     except Person.DoesNotExist:
         return Response(
             {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
     
     try:
@@ -295,7 +295,7 @@ def send_wine_interest_notification(request):
     except Wine.DoesNotExist:
         return Response(
             {'error': f'Вино с ID {wine_id} не найдено'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
 
     # Сохраняем связь интереса пользователя к вину
@@ -304,32 +304,9 @@ def send_wine_interest_notification(request):
     # Формируем сообщение
     message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется вином {wine.full_name}"
 
-    try:
-        send_message(message)
-        return Response(
-            {
-                'success': True,
-                'message': 'Уведомление успешно отправлено',
-                'wine': wine.full_name
-            },
-            status=status.HTTP_200_OK
-        )
-    except BotTokenIsNotSetError as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except TelegramError as e:
-        return Response(
-            {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except Exception as e:
-        return Response(
-            {'error': f'Внутренняя ошибка сервера: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
+    payload, status = handle_message(message)
+    payload.update({'wine': wine.full_name})
+    return Response(payload, status)
 
 @api_view(['POST'])
 def send_event_interest_notification(request):
@@ -349,13 +326,13 @@ def send_event_interest_notification(request):
     if not telegram_id:
         return Response(
             {'error': 'Параметр telegram_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     if not event_id:
         return Response(
             {'error': 'Параметр event_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     try:
@@ -364,7 +341,7 @@ def send_event_interest_notification(request):
     except Person.DoesNotExist:
         return Response(
             {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
     
     try:
@@ -373,39 +350,17 @@ def send_event_interest_notification(request):
     except Event.DoesNotExist:
         return Response(
             {'error': f'Событие с ID {event_id} не найдено'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
 
     # Сохраняем связь интереса пользователя к вину
     person.interested_events.add(event)
 
     message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется событием {event.name}"
-    
-    try:
-        send_message(message)
-        return Response(
-            {
-                'success': True,
-                'message': 'Уведомление успешно отправлено',
-                'event': event.name
-            },
-            status=status.HTTP_200_OK
-        )
-    except BotTokenIsNotSetError as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except TelegramError as e:
-        return Response(
-            {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except Exception as e:
-        return Response(
-            {'error': f'Внутренняя ошибка сервера: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        
+    payload, status = handle_message(message)
+    payload.update({'event': event.name})
+    return Response(payload, status)
 
 @api_view(['POST'])
 def send_subscription_interest_notification(request):
@@ -425,13 +380,13 @@ def send_subscription_interest_notification(request):
     if not telegram_id:
         return Response(
             {'error': 'Параметр telegram_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     if not subscription_id:
         return Response(
             {'error': 'Параметр subscription_id обязателен'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=rest_status.HTTP_400_BAD_REQUEST
         )
     
     try:
@@ -440,7 +395,7 @@ def send_subscription_interest_notification(request):
     except Person.DoesNotExist:
         return Response(
             {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
     
     try:
@@ -449,33 +404,54 @@ def send_subscription_interest_notification(request):
     except Event.DoesNotExist:
         return Response(
             {'error': f'Подписка с ID {subscription_id} не найдена'},
-            status=status.HTTP_404_NOT_FOUND
+            status=rest_status.HTTP_404_NOT_FOUND
         )
 
     message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) интересуется подпиской {subscription.name}"
     
+    payload, status = handle_message(message)
+    payload.update({'subscription': subscription.name})
+    return Response(payload, status)
+
+
+@api_view(['POST'])
+def send_subscribe_notification(request):
+    """
+    Endpoint для отправки уведомления об электронном адресе пользователя.
+    
+    Принимает:
+    - telegram_id: telegram_id пользователя (Person)
+    - email: email пользователя
+    
+    Отправляет администратору сообщение в Telegram.
+    """
+    telegram_id = request.data.get('telegram_id')
+    email = request.data.get('email')
+    
+    # Валидация входных данных
+    if not telegram_id:
+        return Response(
+            {'error': 'Параметр telegram_id обязателен'},
+            status=rest_status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not email:
+        return Response(
+            {'error': 'Параметр email обязателен'},
+            status=rest_status.HTTP_400_BAD_REQUEST
+        )   
+    
     try:
-        send_message(message)
+        # Получаем пользователя по telegram_id
+        person = Person.objects.get(telegram_id=telegram_id)
+    except Person.DoesNotExist:
         return Response(
-            {
-                'success': True,
-                'message': 'Уведомление успешно отправлено',
-                'subscription': subscription.name
-            },
-            status=status.HTTP_200_OK
+            {'error': f'Пользователь с telegram_id "{telegram_id}" не найден'},
+            status=rest_status.HTTP_404_NOT_FOUND
         )
-    except BotTokenIsNotSetError as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except TelegramError as e:
-        return Response(
-            {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    except Exception as e:
-        return Response(
-            {'error': f'Внутренняя ошибка сервера: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+
+    message = f"Пользователь {person.firstname} {person.lastname} ({person.nickname}) оставил свой email адрес: {email}"
+    
+    payload, status = handle_message(message)
+    payload.update({'email': email})
+    return Response(payload, status)

@@ -3,6 +3,7 @@ import logging
 import asyncio
 from telegram import Bot
 from telegram.error import TelegramError
+from rest_framework import status as rest_status
 
 logger = logging.getLogger(__name__)
 
@@ -32,3 +33,14 @@ def send_message(message):
     except Exception as e:
         logger.error(f'Неожиданная ошибка: {e}')
         raise e
+
+def handle_message(message):
+    try:
+        send_message(message)
+        return {'success': True, 'message': 'Уведомление успешно отправлено',}, rest_status.HTTP_200_OK
+    except BotTokenIsNotSetError as e:
+            return {'error': str(e)}, rest_status.HTTP_500_INTERNAL_SERVER_ERROR
+    except TelegramError as e:
+            return {'error': f'Ошибка при отправке сообщения в Telegram: {str(e)}'}, rest_status.HTTP_500_INTERNAL_SERVER_ERROR
+    except Exception as e:
+            return {'error': f'Внутренняя ошибка сервера: {str(e)}'}, rest_status.HTTP_500_INTERNAL_SERVER_ERROR
